@@ -15,9 +15,13 @@ socket.on('connect', function () {
         }
     })
 })
+
+
 socket.on('disconnect', function () {
     console.log('Disconnect from Server.')
 });
+
+
 socket.on('newMessage', function (message) {
     /*const formatted = moment(message.createdAt).format('LT');
     let li = document.createElement('li');
@@ -36,7 +40,17 @@ socket.on('newMessage', function (message) {
     scrollToBottom();
 });
 
-
+socket.on('updateUsersList' , function (users) {
+    let ol = document.createElement('ol');
+    users.forEach(function (user) {
+        let li = document.createElement('li');
+        li.innerHTML = user;
+        ol.appendChild(li);
+    });
+    let usersList = document.querySelector('#users');
+    usersList.innerHTML = "";
+    usersList.appendChild(ol);
+})
 
 socket.on('newLocationMessage', function (message) {
     const formattedTime = moment(message.createdAt).format('LT');
@@ -75,7 +89,6 @@ document.querySelector('#submit-btn').addEventListener('click',function(e){
     var txt = document.querySelector('input[name="message"]').value;
     if (txt && txt !== '' && txt !== ' '){
         socket.emit('createMessage', {
-            from: "User",
             text: txt
         }, function () {
         })
