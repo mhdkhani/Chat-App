@@ -63,11 +63,15 @@ socket.on('newLocationMessage', function (message) {
 
 document.querySelector('#submit-btn').addEventListener('click',function(e){
     e.preventDefault();
-    socket.emit('createMessage', {
-        from: "User",
-        text: document.querySelector('input[name="message"]').value
-    }, function () {
-    })
+    var txt = document.querySelector('input[name="message"]').value;
+    if (txt && txt !== '' && txt !== ' '){
+        socket.emit('createMessage', {
+            from: "User",
+            text: txt
+        }, function () {
+        })
+        document.querySelector('input[name="message"]').value = '';
+    }
 });
 
 document.querySelector('#send-location').addEventListener('click',function(e){
