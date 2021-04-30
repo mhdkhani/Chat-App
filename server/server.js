@@ -3,7 +3,7 @@ const publicPath = path.join(__dirname, '/../public')
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
-const {generateMessage} = require('./utils/message');
+const {generateMessage,generateLocationMessage} = require('./utils/message');
 let app = express();
 let server = http.createServer(app);
 let io = socketIO(server);
@@ -22,6 +22,12 @@ io.on('connection', (socket) => {
         });*/
         callback('This is the Server: ');
     })
+
+
+    socket.on('createLocationMessage' , (coords) => {
+        io.emit('newLocationMessage' , generateLocationMessage('Admin',coords.lat , coords.lng ));
+    })
+
     socket.on('disconnect', () => {
         console.log('User Was Disconnected.');
     })
