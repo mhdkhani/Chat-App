@@ -109,3 +109,42 @@ document.querySelector('#send-location').addEventListener('click',function(e){
         alert('Unable to fetch location.' + e.message)
     })
 });
+
+
+let timer, timeoutVal = 1000;
+const typer = document.getElementById('typer');
+typer.addEventListener('keypress', handleKeyPress);
+typer.addEventListener('keyup', handleKeyUp);
+function handleKeyUp(e) {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => {
+        socket.emit('ClearIsTyping', {}, function () {});
+    }, timeoutVal);
+}
+function handleKeyPress(e) {
+    window.clearTimeout(timer);
+    socket.emit('IsTyping', {}, function () {});
+}
+
+
+socket.on('sendIsTyping', function (message) {
+    var types = document.getElementsByClassName(message.socketId);
+    var count = types.length;
+    if (count <= 0){
+        const template = document.querySelector('#is-typing-template').innerHTML;
+        const html = Mustache.render(template, {
+            from: message.from
+        });
+        let div = document.createElement('div');
+        div.classList.add(message.socketId)
+        div.innerHTML = html;
+        document.querySelector('#is_typings').appendChild(div);
+    }
+});
+
+socket.on('sendClearIsTyping', function (message) {
+    var types = document.getElementsByClassName(message.socketId);
+    for (var i = 0; i < types.length; i++) {
+       types[i].remove()
+    }
+});

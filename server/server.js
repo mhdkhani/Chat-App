@@ -3,7 +3,7 @@ const publicPath = path.join(__dirname, '/../public')
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
-const {generateMessage,generateLocationMessage} = require('./utils/message');
+const {generateMessage,generateLocationMessage,generateIsTyping,generateClearIsTyping} = require('./utils/message');
 const {isRealString} = require('./utils/isRealString');
 const {Users} = require('./utils/users');
 let app = express();
@@ -13,18 +13,29 @@ let users = new Users();
 app.use(express.static(publicPath));
 io.on('connection', (socket) => {
     socket.on('createMessage' , (message,callback) => {
-         //io.emit('newMessage' , generateMessage(message.from,message.text));
-        /*socket.broadcast.emit('newMessage' , {
-            from: message.from ,
-            text: message.text,
-            createdAt: new Date().getTime()
-        });*/
         let user = users.getUser(socket.id);
         if(user && isRealString(message.text)){
             io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
         }
         callback('This is the Server: ');
-    })
+    });
+
+    socket.on('IsTyping' , (message,callback) => {
+        let user = users.getUser(socket.id);
+        if(user){
+            io.to(user.room).emit('sendIsTyping', generateIsTyping(user.name,socket.id));
+        }
+        callback('This is the Server: ');
+    });
+
+    socket.on('ClearIsTyping' , (message,callback) => {
+        let user = users.getUser(socket.id);
+        if(user){
+            io.to(user.room).emit('sendClearIsTyping', generateClearIsTyping(socket.id));
+        }
+        callback('This is the Server: ');
+    });
+
     socket.on('join', (params, callback) => {
         if(!isRealString(params.name) || !isRealString(params.room)){
             return callback('Name and room are required');

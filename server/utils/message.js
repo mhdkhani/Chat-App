@@ -17,4 +17,17 @@ let generateLocationMessage = (from , lat , lng) => {
 };
 
 
-module.exports = {generateMessage,generateLocationMessage}
+let generateIsTyping = (from , socketId) => {
+    return {
+        from,
+        socketId
+    }
+}
+
+let generateClearIsTyping = (socketId) => {
+    return {
+        socketId
+    }
+}
+
+module.exports = {generateMessage,generateLocationMessage,generateIsTyping,generateClearIsTyping}

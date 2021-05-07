@@ -11,15 +11,23 @@
     <div id="users"></div>
 </div>
 <div class="chat__main">
-<ol id="messages" class="chat__messages"></ol>
+    <ol id="is_typings"></ol>
+    <ol id="messages" class="chat__messages"></ol>
 </div>
 <div class="chat__footer">
     <form id="message-form">
-        <input type="text" name="message" placeholder="Message"/>
+        <input type="text" name="message" id="typer" placeholder="Message"/>
         <button type="submit" id="submit-btn">Submit</button>
     </form>
     <button type="button" id="send-location">Send Location</button>
 </div>
+<script id="is-typing-template" type="text/template">
+    <li class="message">
+        <div class="message__title">
+            <span>{{from}}  Is Typing...</span>
+        </div>
+    </li>
+</script>
 <script id="message-template" type="text/template">
     <li class="message">
         <div class="message__title">
