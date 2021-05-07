@@ -11,6 +11,20 @@ button, button:hover {
 #is_typings{
     list-style-type: none
 }
+
+.sender_name{
+    cursor: pointer;
+}
+.pv_main_div{
+    position: absolute;
+    left: 164px;
+    top: 71px;
+    width: 400px;
+    height: 286px;
+    background: #dadada;
+    color: blue;
+    border: 1px solid;
+}
 * {
     box-sizing: border-box;
     margin: 0;

@@ -1,16 +1,18 @@
 const moment = require('moment');
-let generateMessage = (from , text) => {
+let generateMessage = (from ,socketId, text) => {
     return {
         from,
+        socketId,
         text,
         createdAt: moment().valueOf()
     }
 };
 
 
-let generateLocationMessage = (from , lat , lng) => {
+let generateLocationMessage = (from ,socketId, lat , lng) => {
     return {
         from,
+        socketId,
         url: `https://google.com/maps?q=${lat},${lng}`,
         createdAt: moment().valueOf()
     }
