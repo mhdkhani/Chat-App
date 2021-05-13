@@ -8,6 +8,14 @@ let generateMessage = (from ,socketId, text) => {
     }
 };
 
+let generatePrivateMessage = (fromName ,socketTargetId, text) => {
+    return {
+        fromName,
+        socketTargetId,
+        text,
+        createdAt: moment().valueOf()
+    }
+};
 
 let generateLocationMessage = (from ,socketId, lat , lng) => {
     return {
@@ -32,4 +40,4 @@ let generateClearIsTyping = (socketId) => {
     }
 }
 
-module.exports = {generateMessage,generateLocationMessage,generateIsTyping,generateClearIsTyping}
+module.exports = {generateMessage,generatePrivateMessage,generateLocationMessage,generateIsTyping,generateClearIsTyping}

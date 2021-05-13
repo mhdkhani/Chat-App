@@ -3,7 +3,7 @@ const publicPath = path.join(__dirname, '/../public')
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
-const {generateMessage,generateLocationMessage,generateIsTyping,generateClearIsTyping} = require('./utils/message');
+const {generateMessage,generatePrivateMessage,generateLocationMessage,generateIsTyping,generateClearIsTyping} = require('./utils/message');
 const {isRealString} = require('./utils/isRealString');
 const {Users} = require('./utils/users');
 let app = express();
@@ -12,6 +12,10 @@ let io = socketIO(server);
 let users = new Users();
 app.use(express.static(publicPath));
 io.on('connection', (socket) => {
+
+    /**
+    * Send Message To All Members
+    */
     socket.on('createMessage' , (message,callback) => {
         let user = users.getUser(socket.id);
         if(user && isRealString(message.text)){
@@ -19,6 +23,18 @@ io.on('connection', (socket) => {
         }
         callback('This is the Server: ');
     });
+
+    /**
+     * Send Private Message
+     */
+    socket.on('createPrivateMessage' , (message,callback) => {
+        let FromUser = users.getUser(message.from_user);
+        if(FromUser && isRealString(message.text)){
+            io.to(message.to_user).emit('newPrivateMessage', generatePrivateMessage(FromUser.name,message.from_user, message.text));
+        }
+        callback('This is the Server: ');
+    });
+
 
     socket.on('IsTyping' , (message,callback) => {
         let user = users.getUser(socket.id);

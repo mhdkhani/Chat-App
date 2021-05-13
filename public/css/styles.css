@@ -206,3 +206,32 @@ button:disabled {
         margin-right: 0
     }
 }
+
+
+.pv_chat_header_actions{
+    cursor: pointer;
+    width: 21px;
+    height: 21px;
+    background: red;
+    text-align: center;
+    float: right;
+    margin: 2px;
+}
+.pv_writing_section{
+width: 100%;
+height: 58px;
+background: #fff;
+margin-top: 49%;
+}
+
+.pv_header_section{
+width: 100%;
+height: 30px;
+background: #fff;
+}
+.pv_writing_elements{
+width: 30%;
+margin-left: 5px;
+margin-top: 5px;
+
+}

@@ -1,11 +1,12 @@
 let socket = io();
-
+let CurrentSocketId = '';
 function scrollToBottom() {
     let messages = document.querySelector('#messages').lastElementChild;
     messages.scrollIntoView();
 }
 
 socket.on('connect', function () {
+    CurrentSocketId = socket.id;
     let searchQuery = window.location.search.substring(1);
     let params = JSON.parse('{"' + decodeURI(searchQuery).replace(/&/g, '","').replace(/\+/g, ' ').replace(/=/g, '":"') + '"}');
     socket.emit('join', params, function (err) {
@@ -156,13 +157,57 @@ socket.on('sendClearIsTyping', function (message) {
 
 
 /* Private Message Section */
-function OpenPv() {
+function OpenPv(elm) {
+    var socketTargetId = elm.dataset.userid;
+    if (socketTargetId && socketTargetId !== '' && socketTargetId !== ' ' && socketTargetId !== 'admin' &&
+        CurrentSocketId && CurrentSocketId !== '' && CurrentSocketId !== ' ' && CurrentSocketId !== socketTargetId ){
+        var pvId = makeid(12);
+        generatePvBox(pvId,socketTargetId);
+    }
+}
+
+function generatePvBox(pvId,socketTargetId) {
+
     var div = document.createElement('div');
     div.classList.add('pv_main_div');
-    div.setAttribute('id',makeid(12));
+    div.setAttribute('id',pvId);
     div.setAttribute('onmousedown','changePvPosition(this,event)');
+
+
+    var header = document.createElement('div');;
+    header.classList.add('pv_header_section');
+    var close = document.createElement('div');;
+    close.classList.add('pv_chat_header_actions');
+    close.setAttribute('onclick','closeChat("'+pvId+'")')
+    close.innerHTML = '*';
+    var minimize = document.createElement('div');
+    minimize.classList.add('pv_chat_header_actions')
+    minimize.innerHTML = '-'
+    minimize.setAttribute('onclick','MinimizeChat("'+pvId+'" , this)')
+    header.appendChild(minimize)
+    header.appendChild(close)
+
+    var writing = document.createElement('div');;
+    writing.classList.add('pv_writing_section');
+    var input = document.createElement('input');;
+    input.classList.add('pv_writing_elements');
+    var sendMsg = document.createElement('button');
+    sendMsg.setAttribute('onclick','sendPVMsg("'+socketTargetId+'",this)')
+    sendMsg.innerHTML = 'Send Message';
+    sendMsg.classList.add('pv_writing_elements');
+    var sendVideo = document.createElement('button');;
+    sendVideo.innerHTML = 'Send Video';
+    sendVideo.classList.add('pv_writing_elements');
+
+    writing.appendChild(input)
+    writing.appendChild(sendMsg)
+    writing.appendChild(sendVideo)
+
+    div.appendChild(header)
+    div.appendChild(writing)
     document.body.appendChild(div);
 }
+
 var mousePosition;
 var offset = [0,0];
 var isDown = false;
@@ -207,3 +252,52 @@ function makeid(length) {
     }
     return result.join('');
 }
+
+
+function closeChat(pvId) {
+    document.getElementById(pvId).remove()
+}
+
+
+function MinimizeChat(pvId , elm) {
+    var pv = document.getElementById(pvId);
+    pv.style.height = '32px';
+    pv.style.overflow = 'hidden';
+    elm.setAttribute('onclick' , 'ShowChat("'+pvId+'" ,this)');
+    elm.innerHTML = '+';
+}
+
+
+function ShowChat(pvId , elm) {
+    var pv = document.getElementById(pvId);
+    pv.style.height = '286px';
+    pv.style.overflow = 'unset';
+    elm.setAttribute('onclick' , 'MinimizeChat("'+pvId+'" ,this)');
+    elm.innerHTML = '-';
+}
+
+
+
+function sendPVMsg(socketTargetId,elm) {
+    var txt = elm.previousSibling.value;
+    if (txt && txt !== '' && txt !== ' ') {
+        socket.emit('createPrivateMessage', {
+            text: txt,
+            from_user: CurrentSocketId,
+            to_user: socketTargetId
+        }, function () {
+        })
+        elm.previousSibling.value = '';
+    }
+}
+
+
+socket.on('newPrivateMessage', function (message) {
+    var pvId = makeid(12);
+    generatePvBox(pvId,message.socketTargetId);
+
+    /*let div = document.createElement('div');
+    div.innerHTML = html;
+    document.querySelector('#messages').appendChild(div);*/
+    //scrollToBottom();
+});
