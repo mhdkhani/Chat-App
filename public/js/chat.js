@@ -1,5 +1,6 @@
 let socket = io();
 let CurrentSocketId = '';
+
 function scrollToBottom() {
     let messages = document.querySelector('#messages').lastElementChild;
     messages.scrollIntoView();
@@ -167,45 +168,59 @@ function OpenPv(elm) {
 }
 
 function generatePvBox(pvId,socketTargetId) {
+    var privateFrom = 'private_to_'+socketTargetId;
+    var privateFromExist = document.getElementsByClassName(privateFrom);
+    console.log(privateFromExist.length)
+    if (privateFromExist.length <= 0){
+        var div = document.createElement('div');
+        div.classList.add(privateFrom);
+        div.classList.add('pv_main_div');
+        div.setAttribute('id',pvId);
+        div.setAttribute('onmousedown','changePvPosition(this,event)');
 
-    var div = document.createElement('div');
-    div.classList.add('pv_main_div');
-    div.setAttribute('id',pvId);
-    div.setAttribute('onmousedown','changePvPosition(this,event)');
+
+        var header = document.createElement('div');;
+        header.classList.add('pv_header_section');
+        var close = document.createElement('div');;
+        close.classList.add('pv_chat_header_actions');
+        close.setAttribute('onclick','closeChat("'+pvId+'")')
+        close.innerHTML = '*';
+        var minimize = document.createElement('div');
+        minimize.classList.add('pv_chat_header_actions')
+        minimize.innerHTML = '-'
+        minimize.setAttribute('onclick','MinimizeChat("'+pvId+'" , this)')
+        header.appendChild(minimize)
+        header.appendChild(close);
 
 
-    var header = document.createElement('div');;
-    header.classList.add('pv_header_section');
-    var close = document.createElement('div');;
-    close.classList.add('pv_chat_header_actions');
-    close.setAttribute('onclick','closeChat("'+pvId+'")')
-    close.innerHTML = '*';
-    var minimize = document.createElement('div');
-    minimize.classList.add('pv_chat_header_actions')
-    minimize.innerHTML = '-'
-    minimize.setAttribute('onclick','MinimizeChat("'+pvId+'" , this)')
-    header.appendChild(minimize)
-    header.appendChild(close)
+        var main = document.createElement('div');;
+        main.classList.add('pv_main_messages');
+        var ul = document.createElement('ul');;
+        ul.classList.add('pv_ul_messages');
+        ul.setAttribute('id' , socketTargetId)
+        main.appendChild(ul);
 
-    var writing = document.createElement('div');;
-    writing.classList.add('pv_writing_section');
-    var input = document.createElement('input');;
-    input.classList.add('pv_writing_elements');
-    var sendMsg = document.createElement('button');
-    sendMsg.setAttribute('onclick','sendPVMsg("'+socketTargetId+'",this)')
-    sendMsg.innerHTML = 'Send Message';
-    sendMsg.classList.add('pv_writing_elements');
-    var sendVideo = document.createElement('button');;
-    sendVideo.innerHTML = 'Send Video';
-    sendVideo.classList.add('pv_writing_elements');
+        var writing = document.createElement('div');;
+        writing.classList.add('pv_writing_section');
+        var input = document.createElement('input');;
+        input.classList.add('pv_writing_elements');
+        var sendMsg = document.createElement('button');
+        sendMsg.setAttribute('onclick','sendPVMsg("'+socketTargetId+'",this)')
+        sendMsg.innerHTML = 'Send Message';
+        sendMsg.classList.add('pv_writing_elements');
+        var sendVideo = document.createElement('button');;
+        sendVideo.innerHTML = 'Send Video';
+        sendVideo.classList.add('pv_writing_elements');
 
-    writing.appendChild(input)
-    writing.appendChild(sendMsg)
-    writing.appendChild(sendVideo)
+        writing.appendChild(input)
+        writing.appendChild(sendMsg)
+        writing.appendChild(sendVideo)
 
-    div.appendChild(header)
-    div.appendChild(writing)
-    document.body.appendChild(div);
+        div.appendChild(header)
+        div.appendChild(main)
+        div.appendChild(writing)
+        document.body.appendChild(div);
+    }
 }
 
 var mousePosition;
@@ -281,6 +296,9 @@ function ShowChat(pvId , elm) {
 function sendPVMsg(socketTargetId,elm) {
     var txt = elm.previousSibling.value;
     if (txt && txt !== '' && txt !== ' ') {
+        var messageBox = generateMessageBox(moment().valueOf(),'me',txt,socketTargetId)
+        document.getElementById(socketTargetId).appendChild(messageBox);
+
         socket.emit('createPrivateMessage', {
             text: txt,
             from_user: CurrentSocketId,
@@ -293,11 +311,25 @@ function sendPVMsg(socketTargetId,elm) {
 
 
 socket.on('newPrivateMessage', function (message) {
+    var privateTo = message.socketTargetId;
     var pvId = makeid(12);
     generatePvBox(pvId,message.socketTargetId);
-
-    /*let div = document.createElement('div');
-    div.innerHTML = html;
-    document.querySelector('#messages').appendChild(div);*/
-    //scrollToBottom();
+    var messageBox = generateMessageBox(message.createdAt,message.fromName,message.text,message.socketTargetId)
+    document.getElementById(privateTo).appendChild(messageBox);
 });
+
+
+
+function generateMessageBox(createdAt , fromName , text ,  targetId) {
+    const formattedTime = moment(createdAt).format('LT');
+    const template = document.querySelector('#message-template').innerHTML;
+    const html = Mustache.render(template, {
+        from:fromName,
+        text: text,
+        user_id: targetId,
+        createdAt: formattedTime
+    });
+    let div = document.createElement('div');
+    div.innerHTML = html;
+    return div;
+}
